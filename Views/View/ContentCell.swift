@@ -9,6 +9,7 @@ import UIKit
 
 class ContentCell: UITableViewCell {
 
+    @IBOutlet weak var youImage: UIImageView!
     @IBOutlet weak var contentBubble: UIView!
     @IBOutlet weak var contentImage: UIImageView!
     

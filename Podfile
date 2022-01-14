@@ -8,4 +8,6 @@ target 'Views' do
   # Pods for Views
   pod 'Firebase/Auth'
   pod 'Firebase/Firestore'
+  pod 'IQKeyboardManagerSwift'
+
 end

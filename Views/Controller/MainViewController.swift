@@ -32,26 +32,30 @@ class MainViewController: UIViewController  {
     }
     
     func loadContent() {
-        db.collection(K.collectionName).order(by: K.dateField).addSnapshotListener { (querySnapshot, err) in
-            self.contents = []
-
-            if let err = err {
-                print("Error getting documents: \(err)")
-            } else {
-                for doc in querySnapshot!.documents {
-                    let data = doc.data()
-                    if let sender = data[K.senderField] as? String, let body = data[K.bodyField] as? String {
-                        
-                        let content = Content(sender: sender,  contentBody: body)
-                        self.contents.append(content)
-                        
-                        DispatchQueue.main.async {
-                            self.tableView.reloadData()
+        db.collection(K.collectionName)
+            .order(by: K.dateField)
+            .addSnapshotListener { (querySnapshot, err) in
+                self.contents = []
+                
+                if let err = err {
+                    print("Error getting documents: \(err)")
+                } else {
+                    for doc in querySnapshot!.documents {
+                        let data = doc.data()
+                        if let sender = data[K.senderField] as? String, let body = data[K.bodyField] as? String {
+                            
+                            let content = Content(sender: sender,  contentBody: body)
+                            self.contents.append(content)
+                            
+                            DispatchQueue.main.async {
+                                self.tableView.reloadData()
+                                let indexPath = IndexPath(row: self.contents.count - 1, section: 0)
+                                self.tableView.scrollToRow(at: indexPath, at: .top, animated: false)
+                            }
                         }
                     }
                 }
             }
-        }
     }
     
     @IBAction func submitPressed(_ sender: UIButton) {
@@ -65,7 +69,8 @@ class MainViewController: UIViewController  {
                 if let err = err {
                     print("Error adding document: \(err)")
                 } else {
-                        print("Document added with ID: \(ref!.documentID)")
+                    print("Document added with ID: \(ref!.documentID)")
+                    self.contentTextLabel.text = ""
                     
                 }
             }
@@ -91,9 +96,19 @@ extension MainViewController: UITableViewDataSource{
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: K.cellIdentifier, for: indexPath) as! ContentCell
+        let content = contents[indexPath.row]
+        cell.contentLabel.text = content.contentBody
         
+        if content.sender == Auth.auth().currentUser?.email {
+            cell.youImage.isHidden = true
+            cell.contentImage.isHidden = false
+            cell.contentBubble.backgroundColor = UIColor(named: "Color1-3")
+        }else {
+            cell.youImage.isHidden = false
+            cell.contentImage.isHidden = true
+            cell.contentBubble.backgroundColor = UIColor(named: "Color1")
+        }
         
-        cell.contentLabel.text = contents[indexPath.row].contentBody
         return cell
     }
     
